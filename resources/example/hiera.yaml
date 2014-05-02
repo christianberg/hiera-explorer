@@ -1,0 +1,14 @@
+---
+:backends:
+  - yaml
+
+:yaml:
+  :datadir: "data"
+
+:hierarchy:
+  - "%{::fqdn}"
+  - "%{::vertical}/%{::group}/%{::server_type}"
+  - "%{::vertical}/%{::group}"
+  - "%{::vertical}/common"
+  - "%{::group}"
+  - common
