@@ -7,8 +7,6 @@
 
 :hierarchy:
   - "%{::fqdn}"
-  - "%{::vertical}/%{::group}/%{::server_type}"
-  - "%{::vertical}/%{::group}"
-  - "%{::vertical}/common"
-  - "%{::group}"
-  - common
+  - "%{::foo}/%{::bar}"
+  - "%{::foo}/common"
+  - global
