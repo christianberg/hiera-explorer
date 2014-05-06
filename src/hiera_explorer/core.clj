@@ -5,7 +5,8 @@
            [clojure.string :as str]
            [ring.middleware.params :refer [wrap-params]]))
 
-(def config-file "resources/example/hiera.yaml")
+(def config-file (or (System/getenv "HIERA_CONFIG")
+                     "resources/example/hiera.yaml"))
 
 (def navbar
   [:div.navbar.navbar-default
