@@ -28,9 +28,9 @@
       (is (contains? conf (keyword ":yaml")))
       (is (contains? conf (keyword ":hierarchy"))))
     (testing "load hierarchy from config"
-      (is (= (first (hierarchy conf))
+      (is (= (:definition (first (hierarchy conf)))
              "%{::fqdn}"))
-      (is (= (last (hierarchy conf))
+      (is (= (:definition (last (hierarchy conf)))
              "global")))
     (testing "finds the scope variables"
       (is (= (scope-vars conf)

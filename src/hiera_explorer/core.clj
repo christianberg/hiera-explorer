@@ -1,7 +1,9 @@
 (ns hiera-explorer.core
-  (require [hiccup.page :refer [html5]]
+  (require [hiccup.page :as h]
+           [hiccup.form :as f]
            [hiera-explorer.yaml :as yaml]
-           [clojure.string :as str]))
+           [clojure.string :as str]
+           [ring.middleware.params :refer [wrap-params]]))
 
 (def config-file "resources/example/hiera.yaml")
 
@@ -13,57 +15,91 @@
 
 (def solarized-colors
   ["b58900"
+   "6c71c4"
    "cb4b16"
+   "268bd2"
    "dc322f"
    "d33682"
-   "6c71c4"
-   "268bd2"
-   "2aa198"
-   "859900"])
-
-(def values
-  {"::group" "dev"
-   "::fqdn" "host1.example.com"})
+   "859900"
+   "2aa198"])
 
 (def level-styles
   (apply str
          (map-indexed
           (fn [index color]
-            (format ".hier-level-%d { color: #%s; }" index color))
+            (format ".hier-level-%d { color: #%s; }\n" index color))
           solarized-colors)))
 
-(defn hierarchy-view [levels]
+(defn expanded-class [{:keys [index fully-expanded?]}]
+  (if fully-expanded?
+    (str "hier-level-" index)
+    "text-muted"))
+
+(defn raw-class [{:keys [index]}]
+  (str "hier-level-" index))
+
+(defn hierarchy-view [hierarchy name-key class-fn]
   [:ul
-   (map-indexed
-    (fn [index level]
-      [:li {:class (str "hier-level-" index)} level])
-    levels)])
+   (for [level hierarchy]
+     [:li {:class (class-fn level)} (name-key level)])])
 
-(defn replace-variables [levels value-map]
-  (for [level levels]
-    (str
-     (str/replace level
-                  #"%\{(.*?)\}"
-                  (fn [[_ var-name]]
-                    (get value-map var-name "[not set]")))
-     ".yaml")))
+(defn var-form [variable-map]
+  (f/form-to {:class "form-horizontal"}
+             [:get "/"]
+             (for [[name value] (sort variable-map)]
+               [(if (yaml/dirty? value)
+                  :div.form-group.has-error
+                  :div.form-group)
+                (f/label {:class "col-md-2 control-label"} name name)
+                [:div.col-md-10
+                 (f/text-field {:class "form-control"} name value)
+                 (when (yaml/dirty? value)
+                   [:span.help-block
+                    "Only the following characters are allowd: a-z A-Z 0-9 _ -"])]])
+             [:div.form-group
+              [:div.col-md-offset-2.col-md-10
+               (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
-(defn web [request]
+(defn handler [request]
   (let [conf (yaml/load-config config-file)
-        levels (yaml/hierarchy conf)]
+        variable-names (yaml/scope-vars conf)
+        variable-map (merge
+                      (apply hash-map (interleave variable-names (repeat "")))
+                      (select-keys (:query-params request) variable-names))
+        hierarchy (-> conf
+                      yaml/hierarchy
+                      (yaml/expand-hierarchy variable-map))]
     {:status 200
      :body
-     (html5
+     (h/html5
       [:head
-       [:link
-        {:rel "stylesheet"
-         :href "//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css"}]
+       [:title "Hiera Explorer"]
+       (h/include-css
+        "//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css") 
        [:style level-styles]]
       [:body
        navbar
        [:div.container
-        [:div.row
-         [:div.col-md-6
-          (hierarchy-view levels)]
-         [:div.col-md-6
-          (hierarchy-view (replace-variables levels values))]]]])}))
+        [:div.panel.panel-default
+         [:div.panel-heading
+          [:div.row
+           [:div.col-md-12
+            [:h3.panel-title "Scope Variables"]]]]
+         [:div.panel-body
+          (var-form variable-map)]]
+        [:div.panel.panel-default
+         [:div.panel-heading
+          [:div.row
+           [:div.col-md-12
+            [:h3.panel-title "Hierarchy"]]]]
+         [:div.panel-body
+          [:div.row
+           [:div.col-md-6
+            [:h4 "Definition"]
+            (hierarchy-view hierarchy :definition raw-class)]
+           [:div.col-md-6
+            [:h4 "Expanded"]
+            (hierarchy-view hierarchy :expanded expanded-class)]]]]]])}))
+
+(def web (-> handler
+             wrap-params))
