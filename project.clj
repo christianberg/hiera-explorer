@@ -8,4 +8,6 @@
                  [hiccup "1.0.5"]
                  [circleci/clj-yaml "0.5.2"]]
   :plugins [[lein-ring "0.8.10"]]
+  :main hiera-explorer.main
+  :aot :all
   :ring {:handler hiera-explorer.core/web})
