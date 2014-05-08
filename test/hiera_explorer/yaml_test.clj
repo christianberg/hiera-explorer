@@ -1,6 +1,7 @@
 (ns hiera-explorer.yaml-test
   (:require [clojure.test :refer :all]
-            [hiera-explorer.yaml :refer :all]))
+            [hiera-explorer.yaml :refer :all]
+            [me.raynes.fs :as fs]))
 
 (def config-file "resources/example/hiera.yaml")
 
@@ -34,4 +35,17 @@
              "global")))
     (testing "finds the scope variables"
       (is (= (scope-vars conf)
-             #{"::fqdn" "::foo" "::bar"})))))
+             #{"::fqdn" "::foo" "::bar"})))
+    (testing "uses the explicitly defined absolute datadir"
+      (is (= (data-dir conf "/path/to/dir")
+             (fs/file "/path/to/dir"))))
+    (testing "resolves an explicitly defined datadir relative to config file"
+      (is (= (data-dir conf "sub/dir")
+             (fs/file "resources/example/sub/dir"))))
+    (testing "resolves the datadir from the config file relative to config file"
+      (is (= (data-dir conf nil)
+             (fs/file "resources/example/data"))))
+    (testing "uses the dir of the config file as datadir if none is specified"
+      (let [conf (dissoc conf (keyword ":yaml"))]
+        (is (= (data-dir conf nil)
+               (fs/file "resources/example")))))))

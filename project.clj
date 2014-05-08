@@ -6,7 +6,8 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [ring "1.2.2"]
                  [hiccup "1.0.5"]
-                 [circleci/clj-yaml "0.5.2"]]
+                 [circleci/clj-yaml "0.5.2"]
+                 [me.raynes/fs "1.4.5"]]
   :plugins [[lein-ring "0.8.10"]]
   :main hiera-explorer.main
   :aot :all

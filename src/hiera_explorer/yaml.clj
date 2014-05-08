@@ -1,10 +1,13 @@
 (ns hiera-explorer.yaml
   (:require [clj-yaml.core :as yaml]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [me.raynes.fs :as fs]))
 
 (defn load-config [config-file]
-  (yaml/parse-string
-   (slurp config-file)))
+  (->
+   (yaml/parse-string
+    (slurp config-file))
+   (assoc ::config-file (fs/file config-file))))
 
 (defn hierarchy [config]
   (map-indexed
@@ -45,3 +48,13 @@ the empty string, do not replace the pattern."
         (for [{level :definition} (hierarchy config)
               match (re-seq #"%\{(.*?)\}" level)]
           (second match))))
+
+(defn data-dir [config explicit-data-dir]
+  (let [data-dir (or explicit-data-dir
+                     (-> config
+                         (get (keyword ":yaml") {})
+                         (get (keyword ":datadir")))
+                     "")]
+    (if (fs/absolute? data-dir)
+      (fs/file data-dir)
+      (fs/file (fs/parent (::config-file config)) data-dir))))
