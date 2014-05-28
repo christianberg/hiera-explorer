@@ -8,6 +8,8 @@
 (def config-file (or (System/getenv "HIERA_CONFIG")
                      "resources/example/hiera.yaml"))
 
+(def data-dir-override (System/getenv "HIERA_DATADIR"))
+
 (def navbar
   [:div.navbar.navbar-default
    [:div.container
@@ -31,8 +33,8 @@
             (format ".hier-level-%d { color: #%s; }\n" index color))
           solarized-colors)))
 
-(defn expanded-class [{:keys [index fully-expanded?]}]
-  (if fully-expanded?
+(defn expanded-class [{:keys [index data-file]}]
+  (if data-file
     (str "hier-level-" index)
     "text-muted"))
 
@@ -61,46 +63,50 @@
               [:div.col-md-offset-2.col-md-10
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
-(defn handler [request]
-  (let [conf (yaml/load-config config-file)
-        variable-names (yaml/scope-vars conf)
-        variable-map (merge
-                      (apply hash-map (interleave variable-names (repeat "")))
-                      (select-keys (:query-params request) variable-names))
-        hierarchy (-> conf
-                      yaml/hierarchy
-                      (yaml/expand-hierarchy variable-map))]
-    {:status 200
-     :body
-     (h/html5
-      [:head
-       [:title "Hiera Explorer"]
-       (h/include-css
-        "//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css") 
-       [:style level-styles]]
-      [:body
-       navbar
-       [:div.container
-        [:div.panel.panel-default
-         [:div.panel-heading
-          [:div.row
-           [:div.col-md-12
-            [:h3.panel-title "Scope Variables"]]]]
-         [:div.panel-body
-          (var-form variable-map)]]
-        [:div.panel.panel-default
-         [:div.panel-heading
-          [:div.row
-           [:div.col-md-12
-            [:h3.panel-title "Hierarchy"]]]]
-         [:div.panel-body
-          [:div.row
-           [:div.col-md-6
-            [:h4 "Definition"]
-            (hierarchy-view hierarchy :definition raw-class)]
-           [:div.col-md-6
-            [:h4 "Expanded"]
-            (hierarchy-view hierarchy :expanded expanded-class)]]]]]])}))
+(defn get-handler [& {:keys [config-file hiera-data-dir]}]
+  (fn [request]
+    (let [conf (yaml/load-config config-file)
+          data-dir (yaml/data-dir conf hiera-data-dir)
+          variable-names (yaml/scope-vars conf)
+          variable-map (merge
+                        (apply hash-map (interleave variable-names (repeat "")))
+                        (select-keys (:query-params request) variable-names))
+          hierarchy (-> conf
+                        yaml/hierarchy
+                        (yaml/expand-hierarchy variable-map)
+                        (yaml/find-data-files data-dir))]
+      {:status 200
+       :body
+       (h/html5
+        [:head
+         [:title "Hiera Explorer"]
+         (h/include-css
+          "//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css") 
+         [:style level-styles]]
+        [:body
+         navbar
+         [:div.container
+          [:div.panel.panel-default
+           [:div.panel-heading
+            [:div.row
+             [:div.col-md-12
+              [:h3.panel-title "Scope Variables"]]]]
+           [:div.panel-body
+            (var-form variable-map)]]
+          [:div.panel.panel-default
+           [:div.panel-heading
+            [:div.row
+             [:div.col-md-12
+              [:h3.panel-title "Hierarchy"]]]]
+           [:div.panel-body
+            [:div.row
+             [:div.col-md-6
+              [:h4 "Definition"]
+              (hierarchy-view hierarchy :definition raw-class)]
+             [:div.col-md-6
+              [:h4 "Expanded"]
+              (hierarchy-view hierarchy :expanded expanded-class)]]]]]])})))
 
-(def web (-> handler
+(def web (-> (get-handler :config-file config-file
+                          :hiera-data-dir data-dir-override)
              wrap-params))

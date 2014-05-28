@@ -58,3 +58,11 @@ the empty string, do not replace the pattern."
     (if (fs/absolute? data-dir)
       (fs/file data-dir)
       (fs/file (fs/parent (::config-file config)) data-dir))))
+
+(defn find-data-files [levels data-dir]
+  (for [level levels]
+    (or (when (:fully-expanded? level)
+          (let [full-path (fs/file data-dir (:expanded level))]
+            (when (fs/exists? full-path)
+              (assoc level :data-file full-path))))
+        level)))
