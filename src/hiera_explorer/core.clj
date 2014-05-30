@@ -64,17 +64,24 @@
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
 (defn show-data-files [hierarchy]
-  (for [{:keys [expanded data-file] :as level} hierarchy
+  (for [{:keys [expanded data-file index] :as level} hierarchy
         :when data-file]
-    [:div.panel.panel-default
-     [:div.panel-heading
-      [:div.row
-       [:div.col-md-12
-        [:h3.panel-title
-         {:class (expanded-class level)}
-         expanded]]]]
-     [:div.panel-body
-      [:pre (slurp data-file)]]]))
+    (let [panel-id (str "datafile-panel-" index)]
+      [:div.panel.panel-default
+       [:div.panel-heading
+       [:a {:href (str "#" panel-id)
+            :data-toggle "collapse"}
+        [:div.row
+         [:div.col-md-12
+          [:h3.panel-title
+           {:class (expanded-class level)}
+           [:span.caret] " "
+           expanded
+           [:small.pull-right "Click to expand"]]]]]]
+       [:div.panel-collapse.collapse
+        {:id panel-id}
+        [:div.panel-body
+         [:pre (slurp data-file)]]]])))
 
 (defn get-handler [& {:keys [config-file hiera-data-dir]}]
   (fn [request]
@@ -94,7 +101,10 @@
         [:head
          [:title "Hiera Explorer"]
          (h/include-css
-          "//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css") 
+          "//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css")
+         (h/include-js
+          "https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"
+          "//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js")
          [:style level-styles]]
         [:body
          navbar
