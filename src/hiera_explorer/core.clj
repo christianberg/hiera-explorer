@@ -63,6 +63,19 @@
               [:div.col-md-offset-2.col-md-10
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
+(defn show-data-files [hierarchy]
+  (for [{:keys [expanded data-file] :as level} hierarchy
+        :when data-file]
+    [:div.panel.panel-default
+     [:div.panel-heading
+      [:div.row
+       [:div.col-md-12
+        [:h3.panel-title
+         {:class (expanded-class level)}
+         expanded]]]]
+     [:div.panel-body
+      [:pre (slurp data-file)]]]))
+
 (defn get-handler [& {:keys [config-file hiera-data-dir]}]
   (fn [request]
     (let [conf (yaml/load-config config-file)
@@ -105,7 +118,8 @@
               (hierarchy-view hierarchy :definition raw-class)]
              [:div.col-md-6
               [:h4 "Expanded"]
-              (hierarchy-view hierarchy :expanded expanded-class)]]]]]])})))
+              (hierarchy-view hierarchy :expanded expanded-class)]]]]
+          (show-data-files hierarchy)]])})))
 
 (def web (-> (get-handler :config-file config-file
                           :hiera-data-dir data-dir-override)
