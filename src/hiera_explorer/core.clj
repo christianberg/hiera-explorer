@@ -3,6 +3,7 @@
            [hiccup.form :as f]
            [hiera-explorer.yaml :as yaml]
            [clojure.string :as str]
+           [clojure.pprint :refer [pprint]]
            [ring.middleware.params :refer [wrap-params]]))
 
 (def config-file (or (System/getenv "HIERA_CONFIG")
@@ -64,9 +65,12 @@
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
 (defn show-data-files [hierarchy]
-  (for [{:keys [expanded data-file index] :as level} hierarchy
-        :when data-file]
-    (let [panel-id (str "datafile-panel-" index)]
+  (for [{:keys [expanded raw-content parsed-content index] :as level} hierarchy
+        :when raw-content]
+    (let [panel-id (str "datafile-panel-" index)
+          table-id (str panel-id "-table")
+          raw-id (str panel-id "-raw")
+          parsed-id (str panel-id "-parsed")]
       [:div.panel.panel-default
        [:div.panel-heading
        [:a {:href (str "#" panel-id)
@@ -81,7 +85,25 @@
        [:div.panel-collapse.collapse
         {:id panel-id}
         [:div.panel-body
-         [:pre (slurp data-file)]]]])))
+         [:ul.nav.nav-tabs
+          [:li.active
+           [:a {:href (str "#" table-id) :data-toggle "tab"} "Table"]]
+          [:li
+           [:a {:href (str "#" raw-id) :data-toggle "tab"} "Raw"]]
+          [:li
+           [:a {:href (str "#" parsed-id) :data-toggle "tab"} "Parsed"]]]
+         [:div.tab-content
+          [:div.tab-pane.active {:id table-id}
+           [:table.table.table-striped
+            [:thead
+             [:tr [:th "Key"] [:th "Value"]]]
+            [:tbody
+             (for [[k v] (sort parsed-content)]
+               [:tr [:td (str k)] [:td (str v)]])]]]
+          [:div.tab-pane {:id raw-id}
+           [:pre raw-content]]
+          [:div.tab-pane {:id parsed-id}
+           [:pre (with-out-str (pprint parsed-content))]]]]]])))
 
 (defn get-handler [& {:keys [config-file hiera-data-dir]}]
   (fn [request]
@@ -94,7 +116,8 @@
           hierarchy (-> conf
                         yaml/hierarchy
                         (yaml/expand-hierarchy variable-map)
-                        (yaml/find-data-files data-dir))]
+                        (yaml/find-data-files data-dir)
+                        yaml/load-and-parse-data-files)]
       {:status 200
        :body
        (h/html5

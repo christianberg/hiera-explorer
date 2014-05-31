@@ -66,3 +66,13 @@ the empty string, do not replace the pattern."
             (when (fs/exists? full-path)
               (assoc level :data-file full-path))))
         level)))
+
+(defn load-and-parse-data-files [levels]
+  (for [{:keys [data-file] :as level} levels]
+    (if data-file
+      (let [raw-content (slurp data-file)]
+        (assoc
+            level
+          :raw-content raw-content
+          :parsed-content (yaml/parse-string raw-content :keywords false)))
+      level)))
