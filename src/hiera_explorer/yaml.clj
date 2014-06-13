@@ -76,3 +76,7 @@ the empty string, do not replace the pattern."
           :raw-content raw-content
           :parsed-content (yaml/parse-string raw-content :keywords false)))
       level)))
+
+(defn merge-data-files [levels]
+  (apply merge
+         (map :parsed-content levels)))

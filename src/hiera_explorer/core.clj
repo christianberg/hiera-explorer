@@ -64,6 +64,41 @@
               [:div.col-md-offset-2.col-md-10
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
+;; TODO: Extract common code from show-merged-data and show-datafils
+;;       into helper function
+(defn show-merged-data [data]
+  (let [panel-id (str "datafile-panel-merged")
+        table-id (str panel-id "-table")
+        parsed-id (str panel-id "-parsed")]
+    [:div.panel.panel-default
+     [:div.panel-heading
+      [:a {:href (str "#" panel-id)
+           :data-toggle "collapse"}
+       [:div.row
+        [:div.col-md-12
+         [:h3.panel-title
+          [:span.caret] " "
+          "Merged Data"
+          [:small.pull-right "Click to expand"]]]]]]
+     [:div.panel-collapse.collapse
+      {:id panel-id}
+      [:div.panel-body
+       [:ul.nav.nav-tabs
+        [:li.active
+         [:a {:href (str "#" table-id) :data-toggle "tab"} "Table"]]
+        [:li
+         [:a {:href (str "#" parsed-id) :data-toggle "tab"} "Parsed"]]]
+       [:div.tab-content
+        [:div.tab-pane.active {:id table-id}
+         [:table.table.table-striped
+          [:thead
+           [:tr [:th "Key"] [:th "Value"]]]
+          [:tbody
+           (for [[k v] (sort data)]
+             [:tr [:td (str k)] [:td (str v)]])]]]
+        [:div.tab-pane {:id parsed-id}
+         [:pre (with-out-str (pprint data))]]]]]]))
+
 (defn show-data-files [hierarchy]
   (for [{:keys [expanded raw-content parsed-content index] :as level} hierarchy
         :when raw-content]
@@ -152,6 +187,7 @@
              [:div.col-md-6
               [:h4 "Expanded"]
               (hierarchy-view hierarchy :expanded expanded-class)]]]]
+          (show-merged-data (yaml/merge-data-files (reverse hierarchy)))
           (show-data-files hierarchy)]])})))
 
 (def web (-> (get-handler :config-file config-file
