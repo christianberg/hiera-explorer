@@ -92,10 +92,13 @@
         [:div.tab-pane.active {:id table-id}
          [:table.table.table-striped
           [:thead
-           [:tr [:th "Key"] [:th "Value"]]]
+           [:tr [:th "Key"] [:th "Value"] [:th "Source"]]]
           [:tbody
            (for [[k v] (sort data)]
-             [:tr [:td (str k)] [:td (str v)]])]]]
+             [:tr
+              [:td (str k)]
+              [:td (str (:value v))]
+              [:td (str (:source v))]])]]]
         [:div.tab-pane {:id parsed-id}
          [:pre (with-out-str (pprint data))]]]]]]))
 
