@@ -95,7 +95,7 @@
            [:tr [:th "Key"] [:th "Value"] [:th "Source"]]]
           [:tbody
            (for [[k v] (sort data)]
-             [:tr
+             [:tr {:class (str "hier-level-" (:index v))}
               [:td (str k)]
               [:td (str (:value v))]
               [:td (str (:source v))]])]]]

@@ -77,11 +77,12 @@ the empty string, do not replace the pattern."
           :parsed-content (yaml/parse-string raw-content :keywords false)))
       level)))
 
-(defn inject-source [my-map source]
+(defn inject-map [input extra-map]
   (apply hash-map
-         (mapcat #(vector % {:value (my-map %) :source source})
-                 (keys my-map))))
+         (mapcat #(vector % (assoc extra-map :value (input %)))
+                 (keys input))))
 
 (defn merge-data-files [levels]
   (apply merge
-         (map #(inject-source (:parsed-content %) (:expanded %)) levels)))
+         (map #(inject-map (:parsed-content %) {:source (:expanded %)
+                                                :index (:index %)}) levels)))
