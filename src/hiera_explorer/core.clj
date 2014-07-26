@@ -64,84 +64,73 @@
               [:div.col-md-offset-2.col-md-10
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
 
-;; TODO: Extract common code from show-merged-data and show-datafils
-;;       into helper function
+(defn make-panel [panel-title panel-id title-class tabs]
+  [:div.panel.panel-default
+   [:div.panel-heading
+    [:a {:href (str "#" panel-id)
+         :data-toggle "collapse"}
+     [:div.row
+      [:div.col-md-12
+       [:h3.panel-title
+        {:class title-class}
+        [:span.caret] " "
+        panel-title
+        [:small.pull-right "Click to expand"]]]]]]
+   [:div.panel-collapse.collapse
+    {:id panel-id}
+    [:div.panel-body
+     [:ul.nav.nav-tabs
+      (for [tab tabs]
+        [(if (:active tab) :li.active :li)
+         [:a {:href (str "#" (str panel-id \- (:id tab))) :data-toggle "tab"}
+          (:title tab)]])]
+     [:div.tab-content
+      (for [tab tabs]
+        [(if (:active tab) :div.tab-pane.active :div.tab-pane)
+         {:id (str panel-id \- (:id tab))}
+         (:content tab)])]]]])
+
 (defn show-merged-data [data]
-  (let [panel-id (str "datafile-panel-merged")
-        table-id (str panel-id "-table")
-        parsed-id (str panel-id "-parsed")]
-    [:div.panel.panel-default
-     [:div.panel-heading
-      [:a {:href (str "#" panel-id)
-           :data-toggle "collapse"}
-       [:div.row
-        [:div.col-md-12
-         [:h3.panel-title
-          [:span.caret] " "
-          "Merged Data"
-          [:small.pull-right "Click to expand"]]]]]]
-     [:div.panel-collapse.collapse
-      {:id panel-id}
-      [:div.panel-body
-       [:ul.nav.nav-tabs
-        [:li.active
-         [:a {:href (str "#" table-id) :data-toggle "tab"} "Table"]]
-        [:li
-         [:a {:href (str "#" parsed-id) :data-toggle "tab"} "Parsed"]]]
-       [:div.tab-content
-        [:div.tab-pane.active {:id table-id}
-         [:table.table.table-striped
-          [:thead
-           [:tr [:th "Key"] [:th "Value"] [:th "Source"]]]
-          [:tbody
-           (for [[k v] (sort data)]
-             [:tr {:class (str "hier-level-" (:index v))}
-              [:td (str k)]
-              [:td (str (:value v))]
-              [:td (str (:source v))]])]]]
-        [:div.tab-pane {:id parsed-id}
-         [:pre (with-out-str (pprint data))]]]]]]))
+  (make-panel "Merged Data"
+              "datafile-panel-merged"
+              ""
+              [{:id "table"
+                :title "Table"
+                :active true
+                :content [:table.table.table-striped
+                          [:thead
+                           [:tr [:th "Key"] [:th "Value"] [:th "Source"]]]
+                          [:tbody
+                           (for [[k v] (sort data)]
+                             [:tr {:class (str "hier-level-" (:index v))}
+                              [:td (str k)]
+                              [:td (str (:value v))]
+                              [:td (str (:source v))]])]]}
+               {:id "parsed"
+                :title "Parsed"
+                :content [:pre (with-out-str (pprint data))]}]))
 
 (defn show-data-files [hierarchy]
   (for [{:keys [expanded raw-content parsed-content index] :as level} hierarchy
         :when raw-content]
-    (let [panel-id (str "datafile-panel-" index)
-          table-id (str panel-id "-table")
-          raw-id (str panel-id "-raw")
-          parsed-id (str panel-id "-parsed")]
-      [:div.panel.panel-default
-       [:div.panel-heading
-       [:a {:href (str "#" panel-id)
-            :data-toggle "collapse"}
-        [:div.row
-         [:div.col-md-12
-          [:h3.panel-title
-           {:class (expanded-class level)}
-           [:span.caret] " "
-           expanded
-           [:small.pull-right "Click to expand"]]]]]]
-       [:div.panel-collapse.collapse
-        {:id panel-id}
-        [:div.panel-body
-         [:ul.nav.nav-tabs
-          [:li.active
-           [:a {:href (str "#" table-id) :data-toggle "tab"} "Table"]]
-          [:li
-           [:a {:href (str "#" raw-id) :data-toggle "tab"} "Raw"]]
-          [:li
-           [:a {:href (str "#" parsed-id) :data-toggle "tab"} "Parsed"]]]
-         [:div.tab-content
-          [:div.tab-pane.active {:id table-id}
-           [:table.table.table-striped
-            [:thead
-             [:tr [:th "Key"] [:th "Value"]]]
-            [:tbody
-             (for [[k v] (sort parsed-content)]
-               [:tr [:td (str k)] [:td (str v)]])]]]
-          [:div.tab-pane {:id raw-id}
-           [:pre raw-content]]
-          [:div.tab-pane {:id parsed-id}
-           [:pre (with-out-str (pprint parsed-content))]]]]]])))
+    (make-panel expanded
+                (str "datafile-panel-" index)
+                (expanded-class level)
+                [{:id "table"
+                  :title "Table"
+                  :active true
+                  :content [:table.table.table-striped
+                            [:thead
+                             [:tr [:th "Key"] [:th "Value"]]]
+                            [:tbody
+                             (for [[k v] (sort parsed-content)]
+                               [:tr [:td (str k)] [:td (str v)]])]]}
+                 {:id "raw"
+                  :title "Raw"
+                  :content [:pre raw-content]}
+                 {:id "parsed"
+                  :title "Parsed"
+                  :content [:pre (with-out-str (pprint parsed-content))]}])))
 
 (defn get-handler [& {:keys [config-file hiera-data-dir]}]
   (fn [request]
