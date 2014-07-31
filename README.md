@@ -2,6 +2,8 @@
 
 A web-app that lets you explore your hiera files.
 
+[![Dependency Status](http://www.versioneye.com/user/projects/538a612314c158f60100000c/badge.png)](http://www.versioneye.com/user/projects/538a612314c158f60100000c)
+
 ## Overview
 
 Hiera is a tool by PuppetLabs that lets you organize configuration
