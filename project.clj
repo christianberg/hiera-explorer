@@ -1,4 +1,4 @@
-(defproject hiera-explorer "0.1.0"
+(defproject hiera-explorer "0.2.0-SNAPSHOT"
   :description "A web app to visualize Hiera configuration data"
   :url "http://github.com/christianberg/hiera-explorer"
   :license {:name "Eclipse Public License"

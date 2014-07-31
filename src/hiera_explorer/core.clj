@@ -105,10 +105,7 @@
                              [:tr {:class (str "hier-level-" (:index v))}
                               [:td (str k)]
                               [:td (str (:value v))]
-                              [:td (str (:source v))]])]]}
-               {:id "parsed"
-                :title "Parsed"
-                :content [:pre (with-out-str (pprint data))]}]))
+                              [:td (str (:source v))]])]]}]))
 
 (defn show-data-files [hierarchy]
   (for [{:keys [expanded raw-content parsed-content index] :as level} hierarchy
@@ -127,10 +124,7 @@
                                [:tr [:td (str k)] [:td (str v)]])]]}
                  {:id "raw"
                   :title "Raw"
-                  :content [:pre raw-content]}
-                 {:id "parsed"
-                  :title "Parsed"
-                  :content [:pre (with-out-str (pprint parsed-content))]}])))
+                  :content [:pre raw-content]}])))
 
 (defn get-handler [& {:keys [config-file hiera-data-dir]}]
   (fn [request]
