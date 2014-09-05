@@ -4,7 +4,8 @@
            [hiera-explorer.yaml :as yaml]
            [clojure.string :as str]
            [clojure.pprint :refer [pprint]]
-           [ring.middleware.params :refer [wrap-params]]))
+           [ring.middleware.params :refer [wrap-params]]
+           [prone.middleware :as prone]))
 
 (def config-file (or (System/getenv "HIERA_CONFIG")
                      "resources/example/hiera.yaml"))
@@ -178,4 +179,5 @@
 
 (def web (-> (get-handler :config-file config-file
                           :hiera-data-dir data-dir-override)
-             wrap-params))
+             wrap-params
+             prone/wrap-exceptions))
