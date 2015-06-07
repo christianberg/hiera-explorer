@@ -4,11 +4,11 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [ring "1.3.1"]
+                 [ring "1.3.2"]
                  [hiccup "1.0.5"]
                  [circleci/clj-yaml "0.5.3"]
                  [me.raynes/fs "1.4.6"]
-                 [prone "0.6.0"]]
+                 [prone "0.8.2"]]
   :plugins [[lein-ring "0.8.10"]]
   :main hiera-explorer.main
   :aot :all
