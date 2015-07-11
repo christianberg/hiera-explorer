@@ -3,8 +3,8 @@
   :url "http://github.com/christianberg/hiera-explorer"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [ring "1.3.2"]
+  :dependencies [[org.clojure/clojure "1.7.0"]
+                 [ring "1.4.0"]
                  [hiccup "1.0.5"]
                  [circleci/clj-yaml "0.5.3"]
                  [me.raynes/fs "1.4.6"]
