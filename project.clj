@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [ring "1.4.0"]
                  [hiccup "1.0.5"]
-                 [circleci/clj-yaml "0.5.3"]
+                 [circleci/clj-yaml "0.5.4"]
                  [me.raynes/fs "1.4.6"]
                  [prone "0.8.2"]]
   :plugins [[lein-ring "0.8.10"]]
