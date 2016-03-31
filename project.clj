@@ -8,7 +8,7 @@
                  [hiccup "1.0.5"]
                  [circleci/clj-yaml "0.5.5"]
                  [me.raynes/fs "1.4.6"]
-                 [prone "1.0.2"]]
+                 [prone "1.1.1"]]
   :plugins [[lein-ring "0.8.10"]]
   :main hiera-explorer.main
   :aot :all
