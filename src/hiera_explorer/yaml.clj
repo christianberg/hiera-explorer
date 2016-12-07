@@ -15,7 +15,7 @@
    (config (keyword ":hierarchy"))))
 
 (defn dirty? [string]
-  (not (re-seq #"^[a-zA-Z0-9._-]*$" string)))
+  (not (re-seq #"^[a-zA-Z0-9:._-]*$" string)))
 
 (defn expand-variables [string value-map]
   "Replaces patterns of the form %{variable-name} with values from the a map
