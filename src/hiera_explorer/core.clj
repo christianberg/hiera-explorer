@@ -60,7 +60,7 @@
                  (f/text-field {:class "form-control"} name value)
                  (when (yaml/dirty? value)
                    [:span.help-block
-                    "Only the following characters are allowd: a-z A-Z 0-9 _ -"])]])
+                    "Only the following characters are allowd: a-z A-Z 0-9 : . _ -"])]])
              [:div.form-group
               [:div.col-md-offset-2.col-md-10
                (f/submit-button {:class "btn btn-primary"} "Submit")]]))
