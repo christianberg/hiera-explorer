@@ -2,13 +2,13 @@
 
 A web-app that lets you explore your hiera files.
 
-[![Dependency Status](http://www.versioneye.com/user/projects/538a612314c158f60100000c/badge.png)](http://www.versioneye.com/user/projects/538a612314c158f60100000c)
+[![Dependencies Status](https://versions.deps.co/christianberg/hiera-explorer/status.svg)](https://versions.deps.co/christianberg/hiera-explorer)
 
 ## Overview
 
 Hiera is a tool by PuppetLabs that lets you organize configuration
 data in hierarchically organized files (usually in yaml format). For
-more information, see the 
+more information, see the
 [Hiera documentation](http://docs.puppetlabs.com/hiera/1/).
 
 While Hiera offers a lot of flexibility, you quickly end up with your
