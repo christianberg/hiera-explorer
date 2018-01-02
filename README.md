@@ -37,7 +37,7 @@ section of the Github project.
 To start the app, run
 
 ```
-java -jar hiera-explorer-0.1.0-standalone.jar
+java -jar hiera-explorer-0.2.8-standalone.jar
 ```
 
 ### From Source
