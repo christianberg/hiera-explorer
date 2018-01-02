@@ -1,11 +1,11 @@
 (ns hiera-explorer.core
-  (require [hiccup.page :as h]
-           [hiccup.form :as f]
-           [hiera-explorer.yaml :as yaml]
-           [clojure.string :as str]
-           [clojure.pprint :refer [pprint]]
-           [ring.middleware.params :refer [wrap-params]]
-           [prone.middleware :as prone]))
+  (:require [hiccup.page :as h]
+            [hiccup.form :as f]
+            [hiera-explorer.yaml :as yaml]
+            [clojure.string :as str]
+            [clojure.pprint :refer [pprint]]
+            [ring.middleware.params :refer [wrap-params]]
+            [prone.middleware :as prone]))
 
 (def config-file (or (System/getenv "HIERA_CONFIG")
                      "resources/example/hiera.yaml"))
